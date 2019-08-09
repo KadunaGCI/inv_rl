@@ -1,25 +1,32 @@
 import numpy as np
 import itertools
 import pprint
+import pickle
+import sys
     
 class State:
-    
-    def __init__(self,n,q):
-        self.n = n
-        self.q = q
-        self.T = np.zeros([n,q,q])
+    def __init__(self,n=None,q=None,T=None):
+        if T is None:
+            self.n = n
+            self.q = q
+            self.T = np.zeros([n,q,q])
+        else:
+            self.n, self.q, _ = T.shape
+            self.T = T
         self.basis = None # staticにしたい
         self.feature = None
-        
-    def hello(self):
-        print('hello')
     
     def shape(self):
         return self.T.shape
     
     def show(self):
         print(self.T)
+
+    def save(self,path):
+        with open(path + '.pickle', 'wb') as f:
+            pickle.dump(self, f)
         
+    # wanna cash as static
     def mk_basis(self):
         q = self.q
         n = self.n
@@ -29,9 +36,7 @@ class State:
         for b in p:
             for j in range(0,n):
                 for k in range(0,q*q):
-                    #print(b,i,j,k)
                     if b[j]==k: 
-                        #print(b,i,j,k)
                         bss[i][j][int(k/q)][k%q] = 1
             i = i+1
         self.basis = bss
@@ -41,3 +46,17 @@ class State:
     
     # theta = np.random.uniform(size=2*2*2).reshape([2,2,2])
     # s.basis[0]*(theta) #要素積
+
+if __name__ == '__main__':
+    if (len(sys.argv)==1):
+        s = State(5,5)
+        s.mk_basis()
+        #s.save('./')
+    else:
+        with open('tmp.pickle', 'rb') as f:
+            print('LOADING')
+            s = pickle.load(f)
+    s.show()
+    print('-----------')
+    print(s.basis)
+    
